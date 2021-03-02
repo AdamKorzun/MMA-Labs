@@ -7,6 +7,7 @@ class Task1:
         x = np.zeros(n)
         for i in range(n):
             if a_matrix[i][i] == 0.0:
+                print(a_matrix)
                 # swap row with non-zero one
                 swapped = False
                 for j in range(i+1, len(a_matrix)):
@@ -14,7 +15,9 @@ class Task1:
                         a_matrix[[j,i]] = a_matrix[[i, j]]
                         swapped = True
                         break
+
                 if not swapped:
+
                     raise ValueError()
 
             for j in range(i+1, n):
@@ -92,7 +95,7 @@ class Task1:
         print('gaussian_elimination_1: {}'.format(res_1))
         print('gaussian_elimination_2: {}'.format(res_2))
         print('gaussian_elimination_3: {}'.format(res_3))
-        return res_1.all() == res_2.all() == res_3.all()
+
 
 
 if __name__ == '__main__':
@@ -102,12 +105,12 @@ if __name__ == '__main__':
     print(Task1.gaussian_elimination_1(a_matrix.copy()))
     print(Task1.gaussian_elimination_2(a_matrix.copy()))
     print(Task1.gaussian_elimination_3(a_matrix.copy()))
-    test_1 = np.array([[1, -1, -5],
-                       [0, 1, 1]])
-    print(Task1.test_eliminations(test_1))
-    test_2 = np.array([[0, 1, 1],
+    test_1 = np.array([[0, 1, 1],
                        [1, -1, -5]])
-    print(Task1.test_eliminations(test_2))
-    test_3 = np.array([[1, -1, -5],
-                       [0, 1, 1]])
-    print(Task1.test_eliminations(test_3))
+    Task1.test_eliminations(test_1)
+    test_2 = np.array([[3, 2, -5, -1],
+                       [2, -1, 3, 13],
+                       [1, 2, -1, 9]])
+    Task1.test_eliminations(test_2)
+    test_3 = Task1.get_a_matrix(4)
+    Task1.test_eliminations(test_3)

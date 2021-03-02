@@ -21,6 +21,18 @@ class Task2:
 
     def iteration_method():
         None
+    def richardson_sol(A,b,epsilon=0.0001,x0=None):
+        if (len(A)!=len(A[0]))or(len(A)!=len(b)):
+            return None
+        k,xk=0,x0
+        if (x0==None):
+            xk=b[:]
+        rk=b - np.dot(A,xk)
+        while (np.linalg.norm(rk)>epsilon):
+            xk += rk
+            k+=1
+            rk=b - np.dot(A,xk)
+        return xk
 
     def seidel(A, b, x, N, tol):
         maxIterations = 1000000
@@ -52,7 +64,14 @@ class Task2:
 
 if __name__ == "__main__":
     a_matrix = Task2.get_matrix(8)
+    print(a_matrix)
     b_vector = np.array([[1.2], [2.2], [4.0], [0.0], [-1.2]])
     guess = [0.0, 0.0,0.0, 0.0, 0.0]
-    print(Task2.seidel(a_matrix.copy(), b_vector.copy(), guess, len(guess), 0.0001))
-    #print(Task2.get_matrix(8))
+    test_1 = np.array([[1, -1],
+                       [0, 1]])
+    b = np.array([[-5], [1]])
+    guess =[0.0, 0.0]
+
+    print(Task2.seidel(test_1, b, guess, len(guess) , 0.0001))
+    #print(Task2.seidel(a_matrix.copy(), b_vector.copy(), guess, len(guess), 0.0001))
+    #print(Task2.richardson_sol(a_matrix,b_vector))
