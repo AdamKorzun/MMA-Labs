@@ -19,8 +19,19 @@ class Task2:
         a_matrix = c_matrix * variant + d_matrix
         return a_matrix
 
-    def iteration_method():
-        None
+    def iteration(A, b, m):
+        n = len(A)
+        x = np.zeros(n)
+        xBuf = np.zeros(n)
+        for _ in range(m):
+            for i in range(n):
+                sum = 0
+                for j in range(n):
+                    if j != i:
+                        sum += A[i][j]*x[j]
+                xBuf[i] = (b[i] - sum)/A[i][i]
+            x = xBuf
+            return x
     def richardson_sol(A,b,epsilon=0.0001,x0=None):
         if (len(A)!=len(A[0]))or(len(A)!=len(b)):
             return None
@@ -67,10 +78,13 @@ if __name__ == "__main__":
     print(a_matrix)
     b_vector = np.array([[1.2], [2.2], [4.0], [0.0], [-1.2]])
     guess = [0.0, 0.0,0.0, 0.0, 0.0]
+    '''
     test_1 = np.array([[1, -1],
                        [0, 1]])
     b = np.array([[-5], [1]])
     guess =[0.0, 0.0]
-    print(Task2.seidel(test_1, b, guess, len(guess) , 0.0001))
-    #print(Task2.seidel(a_matrix.copy(), b_vector.copy(), guess, len(guess), 0.0001))
+    '''
+    #print(Task2.seidel(test_1, b, guess, len(guess) , 0.0001))
+    print(Task2.seidel(a_matrix.copy(), b_vector.copy(), guess, len(guess), 0.0001))
+    print(Task2.iteration(a_matrix.copy(), b_vector.copy(), 1000))
     #print(Task2.richardson_sol(a_matrix,b_vector))
