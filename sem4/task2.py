@@ -78,17 +78,18 @@ class Task2:
 
 if __name__ == "__main__":
     a_matrix = Task2.get_matrix(8)
-    print(a_matrix)
+    #print(a_matrix)
     np.set_printoptions(16)
     b_vector = np.array([[1.2], [2.2], [4.0], [0.0], [-1.2]])
     guess = [0.0, 0.0,0.0, 0.0, 0.0]
     tol = 0.00001
+    
     print(Task2.seidel(a_matrix.copy(), b_vector.copy(), guess, len(guess), tol))
     print(Task2.simple_iterations(a_matrix.copy(), b_vector.copy(), tol))
-    '''
-    test_1 = np.array([[1, -1],
-                       [0, 1]])
+
+    test_1 = np.array([[1.0, -1.0],
+                       [0.0, 1.0]])
     b = np.array([[-5], [1]])
     guess =[0.0, 0.0]
-    print(Task2.seidel(test_1, b, guess, len(guess) , 0.0001))
-    '''
+
+    print(Task2.seidel(test_1, b, guess, len(guess) , tol))

@@ -87,13 +87,13 @@ class Task3:
         print('Number of iterations: {}'.format(counter))
         return x
 
-f = lambda x: x**3 + -13.3667 * x**2 +39.8645 * x + -20.6282
+f = lambda x: x**2 - 8 * x + 12
 if __name__ == "__main__":
     a = -13.3667
     b = 39.8645
     c = -20.6282
     root_range = [-10, 10]
-    polynom = Poly(x**3 + a * x**2 +b * x + c)
+    polynom = Poly(x**2 - 8 * x + 12)
     number_of_roots = Task3.sturm_theorem(polynom, root_range)
     ranges = []
     for i in range(number_of_roots):
@@ -106,6 +106,7 @@ if __name__ == "__main__":
 
     print(ranges)
     tol = 0.00001
-    print(Task3.bisection(f, ranges[2][0], ranges[2][1], tol))
-    print(Task3.secant(f, ranges[2][0], ranges[2][1], tol))
-    print(Task3.newtons_method(f, -10, tol))
+    for i in range(len(ranges)):
+        print(Task3.bisection(f, ranges[i][0], ranges[i][1], tol))
+        print(Task3.secant(f, ranges[i][0], ranges[i][1], tol))
+        print(Task3.newtons_method(f, ranges[i][0], tol))
