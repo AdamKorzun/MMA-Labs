@@ -71,7 +71,6 @@ if __name__ == "__main__":
                        [0, 1]])
     b = np.array([[-5], [1]])
     guess =[0.0, 0.0]
-
     print(Task2.seidel(test_1, b, guess, len(guess) , 0.0001))
     #print(Task2.seidel(a_matrix.copy(), b_vector.copy(), guess, len(guess), 0.0001))
     #print(Task2.richardson_sol(a_matrix,b_vector))

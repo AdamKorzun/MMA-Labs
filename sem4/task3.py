@@ -58,32 +58,32 @@ def bisection(f, a, b, tol, counter = 0):
 def secant(f,a,b,tol):
     if f(a)*f(b) >= 0:
         raise Exception('Error')
-    a_n = a
-    b_n = b
+    left = a
+    right = b
     max_iterations = 1000
     for n in range(1,max_iterations):
-        m_n = a_n - f(a_n)*(b_n - a_n)/(f(b_n) - f(a_n))
-        f_m_n = f(m_n)
-        if np.abs(f_m_n)  <  tol:
+        root_approx = left - f(left) * (right - left) / (f(right) - f(left))
+        func_value = f(root_approx)
+        if np.abs(func_value)  <  tol:
             print('Number of iterations: {}'.format(n))
-            return m_n
-        elif f(a_n)*f_m_n < 0:
-            a_n = a_n
-            b_n = m_n
-        elif f(b_n)*f_m_n < 0:
-            a_n = m_n
-            b_n = b_n
+            return root_approx
+        elif f(left)*func_value < 0:
+            right = root_approx
+        elif f(right)*func_value < 0:
+            left = root_approx
         else:
             raise Exception('Error')
-    return a_n - f(a_n)*(b_n - a_n)/(f(b_n) - f(a_n))
 
 def newtons_method(f, x, tol):
+    counter = 0
     while True:
+        counter+=1
         x1 = x - f(x) / misc.derivative(f, x)
-        t = abs(x1 - x)
-        if t < tolerance:
+        est = abs(x1 - x)
+        if est < tol:
             break
         x = x1
+    print('Number of iterations: {}'.format(counter))
     return x
 
 if __name__ == "__main__":
@@ -96,21 +96,14 @@ if __name__ == "__main__":
     ranges = []
     for i in range(number_of_roots):
         sep_range = separate_roots(polynom, root_range.copy())
-        print(root_range)
-        print(sep_range)
-
         if sep_range[0] == root_range[0]:
             root_range[0] = sep_range[1]
         else:
             root_range[1] = sep_range[0]
         ranges.append(sep_range.copy())
 
-
-
-
-
     print(ranges)
     tol = 0.00001
-    print(bisection(f, ranges[0][0], ranges[0][1], tol))
-    print(secant(f, ranges[0][0], ranges[0][1], tol))
+    print(bisection(f, ranges[2][0], ranges[2][1], tol))
+    print(secant(f, ranges[2][0], ranges[2][1], tol))
     print(newtons_method(f, -10, tol))
