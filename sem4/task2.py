@@ -13,42 +13,44 @@ class Task2:
                              [0.12, -0.13, -1.33, 0.11, 0.17],
                              [0.17, 0.12, -0.13, -1.33, 0.11],
                              [0.11, 0.67, 0.12, -0.13, -1.33]])
-        #b_vector = np.array([[1.2], [2.2], [4.0], [0.0], [-1.2]])
-        #res_matrix = np.concatenate((a_matrix, b_vector), axis=1)
-        #return res_matrix
         a_matrix = c_matrix * variant + d_matrix
         return a_matrix
 
-    def iteration(A, b, m):
-        n = len(A)
-        x = np.zeros(n)
-        xBuf = np.zeros(n)
-        for _ in range(m):
+    def simple_iterations(matrix, vector, eps):
+        n = len(matrix)
+        res_matrix = np.zeros((n, n))
+        for i in range(n):
+            for j in range(n):
+                if i != j:
+                    res_matrix[i][j] = -matrix[i][j] / matrix[i][i]
+        res_vector = vector.copy()
+        for i in range(n):
+            res_vector[i] /= matrix[i][i]
+        x = res_vector.copy()
+        next_x = x.copy()
+        while True:
+            x = next_x.copy()
             for i in range(n):
-                sum = 0
+                next_x[i] = 0
                 for j in range(n):
-                    if j != i:
-                        sum += A[i][j]*x[j]
-                xBuf[i] = (b[i] - sum)/A[i][i]
-            x = xBuf
-            return x
-    def richardson_sol(A,b,epsilon=0.0001,x0=None):
-        if (len(A)!=len(A[0]))or(len(A)!=len(b)):
-            return None
-        k,xk=0,x0
-        if (x0==None):
-            xk=b[:]
-        rk=b - np.dot(A,xk)
-        while (np.linalg.norm(rk)>epsilon):
-            xk += rk
-            k+=1
-            rk=b - np.dot(A,xk)
-        return xk
+                    next_x[i] += x[j]*res_matrix[i][j]
+                next_x[i] += res_vector[i]
+            norm = abs(next_x - x)
+            if norm.max() < eps:
+                break
+        return x
+
+    def norm(matrix):
+        norm = np.zeros(len(matrix))
+        for i in range(len(matrix)):
+            for j in range(len(matrix)):
+                norm[i] += abs(matrix[i][j])
+        return norm.max()
 
     def seidel(A, b, x, N, tol):
-        maxIterations = 1000000
+        max_iterations = 1000000
         xprev = [0.0 for i in range(N)]
-        for i in range(maxIterations):
+        for i in range(max_iterations):
             for j in range(N):
                 xprev[j] = x[j]
             for j in range(N):
@@ -62,6 +64,7 @@ class Task2:
             for j in range(N):
                 diff1norm = diff1norm + abs(x[j] - xprev[j])
                 oldnorm = oldnorm + abs(xprev[j])
+
             if oldnorm == 0.0:
                 oldnorm = 1.0
             norm = diff1norm / oldnorm
@@ -76,15 +79,16 @@ class Task2:
 if __name__ == "__main__":
     a_matrix = Task2.get_matrix(8)
     print(a_matrix)
+    np.set_printoptions(16)
     b_vector = np.array([[1.2], [2.2], [4.0], [0.0], [-1.2]])
     guess = [0.0, 0.0,0.0, 0.0, 0.0]
+    tol = 0.00001
+    print(Task2.seidel(a_matrix.copy(), b_vector.copy(), guess, len(guess), tol))
+    print(Task2.simple_iterations(a_matrix.copy(), b_vector.copy(), tol))
     '''
     test_1 = np.array([[1, -1],
                        [0, 1]])
     b = np.array([[-5], [1]])
     guess =[0.0, 0.0]
+    print(Task2.seidel(test_1, b, guess, len(guess) , 0.0001))
     '''
-    #print(Task2.seidel(test_1, b, guess, len(guess) , 0.0001))
-    print(Task2.seidel(a_matrix.copy(), b_vector.copy(), guess, len(guess), 0.0001))
-    print(Task2.iteration(a_matrix.copy(), b_vector.copy(), 1000))
-    #print(Task2.richardson_sol(a_matrix,b_vector))
