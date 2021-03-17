@@ -1,4 +1,7 @@
 from sympy import *
+import numpy as np
+
+
 class Task4:
     def __init__(self, a, m,x, y, X, Y):
         self.a = a
@@ -15,35 +18,32 @@ class Task4:
         X = self.X
         Y = self.Y
         x0, y0 = 1.1, 0.4
-        x1, y1 = X.subs(x, x0).subs(y, y0), Y.subs(x, x0).subs(y, y0)
+        x_guess, y_guess = X.subs(x, x0).subs(y, y0), Y.subs(x, x0).subs(y, y0)
         counter = 1
-        while (abs(x0 - x1) > tol or abs(y0 - y1) > tol):
-            x0, y0 = x1, y1
-            x1, y1 = X.subs(x, x0).subs(y, y0), Y.subs(x, x0).subs(y, y0)
+        while (abs(x0 - x_guess) > tol or abs(y0 - y_guess) > tol):
+            x0, y0 = x_guess, y_guess
+            x_guess, y_guess = X.subs(x, x0).subs(y, y0), Y.subs(x, x0).subs(y, y0)
             counter += 1
         print('Number of iterations: {}'.format(counter))
-        return [x1, y1]
-    def NewtonM(self, tol):
+        return [x_guess, y_guess]
+    def NewtonM(self,f1, f2, tol):
         a = self.a
         m = self.m
         x = self.x
         y = self.y
-        X = self.X
-        Y = self.Y
-        f1 = tan(x*y + m) - x
-        f2 = a*x**2 + 2*y**2 - 1
         F = Matrix([f1, f2])
         J = Matrix([[diff(f1, x), diff(f1, y)], [diff(f2, x), diff(f2, y)]])
-        v0 = Matrix([1.1, 0.4])
+        est = Matrix([1.1, 0.4])
         J = J.inv()
-        v1 = (v0 - J.inv()*F).subs(x, v0[0]).subs(y, v0[1])
+        guess = (est - J.inv()*F).subs(x, est[0]).subs(y, est[1])
         counter = 1
-        while (abs(v0[0] - v1[0]) > tol or abs(v0[1] - v1[1]) > tol):
-            v0 = v1
-            v1 = (v0 - J*F).subs(x, v0[0]).subs(y, v0[1])
+        #or abs(est[1] - guess[1]) > tol
+        while (abs(est[0] - guess[0]) > tol):
+            est = guess
+            guess = (est - J*F).subs(x, est[0]).subs(y, est[1])
             counter += 1
         print('Number of iterations: {}'.format(counter))
-        return [v1[0], v1[1]]
+        return [guess[0], guess[1]]
 
 if __name__ == "__main__":
     tol = 0.0001
@@ -54,7 +54,7 @@ if __name__ == "__main__":
     task4 = Task4(a, m, x, y, sqrt((1-2*y**2)/a), (atan(x) - m) / x)
 
     print(task4.MSI(tol))
-    print(task4.NewtonM(tol))
+    print(task4.NewtonM(tan(x*y + m) - x, a*x**2 + 2*y**2 - 1, tol))
     p1 = plot(sqrt((1-2*y**2)/a), show = False)
     p2 = plot((atan(x) - m) / x, show = False)
     p1.append(p2[0])
