@@ -14,7 +14,7 @@ class Task4:
         y = self.y
         X = self.X
         Y = self.Y
-        x0, y0 = 0.9, 0.5
+        x0, y0 = 1.1, 0.4
         x1, y1 = X.subs(x, x0).subs(y, y0), Y.subs(x, x0).subs(y, y0)
         counter = 1
         while (abs(x0 - x1) > tol or abs(y0 - y1) > tol):
@@ -34,7 +34,7 @@ class Task4:
         f2 = a*x**2 + 2*y**2 - 1
         F = Matrix([f1, f2])
         J = Matrix([[diff(f1, x), diff(f1, y)], [diff(f2, x), diff(f2, y)]])
-        v0 = Matrix([0.9, 0.5])
+        v0 = Matrix([1.1, 0.4])
         J = J.inv()
         v1 = (v0 - J.inv()*F).subs(x, v0[0]).subs(y, v0[1])
         counter = 1
@@ -52,5 +52,10 @@ if __name__ == "__main__":
     x = Symbol('x')
     y = Symbol('y')
     task4 = Task4(a, m, x, y, sqrt((1-2*y**2)/a), (atan(x) - m) / x)
+
     print(task4.MSI(tol))
     print(task4.NewtonM(tol))
+    p1 = plot(sqrt((1-2*y**2)/a), show = False)
+    p2 = plot((atan(x) - m) / x, show = False)
+    p1.append(p2[0])
+    p1.show()
