@@ -3,20 +3,9 @@ import numpy as np
 
 
 class Task4:
-    def __init__(self, a, m,x, y, X, Y):
-        self.a = a
-        self.m = m
-        self.x = x
-        self.y = y
-        self.X = X
-        self.Y = Y
-    def MSI(self, tol):
-        a = self.a
-        m = self.m
-        x = self.x
-        y = self.y
-        X = self.X
-        Y = self.Y
+    def MSI(X, Y, tol):
+        #X = self.X
+        #Y = self.Y
         x0, y0 = 1.1, 0.4
         x_guess, y_guess = X.subs(x, x0).subs(y, y0), Y.subs(x, x0).subs(y, y0)
         counter = 1
@@ -26,15 +15,13 @@ class Task4:
             counter += 1
         print('Number of iterations: {}'.format(counter))
         return [x_guess, y_guess]
-    def NewtonM(self,f1, f2, tol):
-        a = self.a
-        m = self.m
-        x = self.x
-        y = self.y
+
+    def NewtonM(f1, f2,x, y, tol):
+        #x = self.x
+        #y = self.y
         matrix = Matrix([f1, f2])
         J = Matrix([[diff(f1, x), diff(f1, y)], [diff(f2, x), diff(f2, y)]]).inv()
         est = Matrix([1.1, 0.4])
-        #J = J.inv()
         guess = (est - J.inv()*matrix).subs(x, est[0]).subs(y, est[1])
         counter = 1
         while (abs(est[0] - guess[0]) > tol):
@@ -43,6 +30,25 @@ class Task4:
             counter += 1
         print('Number of iterations: {}'.format(counter))
         return [guess[0], guess[1]]
+def test_1(tol):
+    x = Symbol('x')
+    y = Symbol('y')
+    func1 = x**2 - 2*y**2 - x * y + 2*x - y + 1
+    func2 = 2*x**2 - y**2 + x * y + 3*y - 5
+    print(nsolve([func1, func2],[x,y], [-1,-1]))
+    X = solve(func1, x)[1]
+    Y = solve(func2, y)[1]
+    p1 = plot(solve(func1, y)[0], show = False)
+    p2 = plot(solve(func2, y)[0], show = False)
+    p3 = plot(solve(func1, y)[1], show = False)
+    p4 = plot(solve(func2, y)[1], show = False)
+    p1.append(p2[0])
+    p1.append(p3[0])
+    p1.append(p4[0])
+    p1.show()
+    print(f'{X}\n{Y}')
+    print(Task4.NewtonM(func1, func2, x, y, tol))
+    print(Task4.MSI(X, Y, tol))
 
 if __name__ == "__main__":
     tol = 0.0001
@@ -50,12 +56,16 @@ if __name__ == "__main__":
     m = 0.4
     x = Symbol('x')
     y = Symbol('y')
-
-    task4 = Task4(a, m, x, y, sqrt((1-2*y**2)/a), (atan(x) - m) / x)
     func1 = tan(x*y + m) - x
     func2 = a*x**2 + 2*y**2 - 1
-    print(task4.MSI(tol))
-    print(task4.NewtonM(func1, func2, tol))
+    X = solve(func1, y)[0]
+    Y = solve(func2, x)[0]
+    print(f'{X}\n{Y}')
+    X = sqrt((1-2*y**2)/a)
+    Y = (atan(x) - m) / x
+    print(test_1(tol))
+    print(Task4.MSI(X, Y, tol))
+    print(Task4.NewtonM(func1, func2, x, y, tol))
     p1 = plot(sqrt((1-a*x**2)/2), show = False)
     p2 = plot((atan(x) - m) / x, show = False)
     p1.append(p2[0])
