@@ -31,16 +31,15 @@ class Task4:
         m = self.m
         x = self.x
         y = self.y
-        F = Matrix([f1, f2])
-        J = Matrix([[diff(f1, x), diff(f1, y)], [diff(f2, x), diff(f2, y)]])
+        matrix = Matrix([f1, f2])
+        J = Matrix([[diff(f1, x), diff(f1, y)], [diff(f2, x), diff(f2, y)]]).inv()
         est = Matrix([1.1, 0.4])
-        J = J.inv()
-        guess = (est - J.inv()*F).subs(x, est[0]).subs(y, est[1])
+        #J = J.inv()
+        guess = (est - J.inv()*matrix).subs(x, est[0]).subs(y, est[1])
         counter = 1
-        #or abs(est[1] - guess[1]) > tol
         while (abs(est[0] - guess[0]) > tol):
             est = guess
-            guess = (est - J*F).subs(x, est[0]).subs(y, est[1])
+            guess = (est - J*matrix).subs(x, est[0]).subs(y, est[1])
             counter += 1
         print('Number of iterations: {}'.format(counter))
         return [guess[0], guess[1]]
@@ -51,11 +50,13 @@ if __name__ == "__main__":
     m = 0.4
     x = Symbol('x')
     y = Symbol('y')
-    task4 = Task4(a, m, x, y, sqrt((1-2*y**2)/a), (atan(x) - m) / x)
 
+    task4 = Task4(a, m, x, y, sqrt((1-2*y**2)/a), (atan(x) - m) / x)
+    func1 = tan(x*y + m) - x
+    func2 = a*x**2 + 2*y**2 - 1
     print(task4.MSI(tol))
-    print(task4.NewtonM(tan(x*y + m) - x, a*x**2 + 2*y**2 - 1, tol))
-    p1 = plot(sqrt((1-2*y**2)/a), show = False)
+    print(task4.NewtonM(func1, func2, tol))
+    p1 = plot(sqrt((1-a*x**2)/2), show = False)
     p2 = plot((atan(x) - m) / x, show = False)
     p1.append(p2[0])
     p1.show()
