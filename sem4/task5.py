@@ -80,6 +80,10 @@ if __name__ == "__main__":
                        [-1, 0, 1],
                        [1, 2, -1]])
     test_eigen(matrix, tol)
+    matrix = np.array([[1, -1, 0],
+                       [-1, 0, 1],
+                       [0, 1, 1]])
+    test_eigen(matrix, tol)
 
     a = get_a_matrix(8)
     U = Task5.get_u_matrix(a)
