@@ -90,58 +90,17 @@ class Task8:
             counter += 1
         return derivative, counter
 
-def test1():
-    f = lambda x: np.sin(x) * np.cos(x)
-    print("LR method: ")
+
+def t():
+    f = lambda x: np.sin(x) / x
     print(Task8.calc_integral(f, 1, 2, 0.000001, Types.left_rect))
-    print("RR method: ")
     print(Task8.calc_integral(f, 1, 2, 0.000001, Types.right_rect))
-    print("CR method: ")
     print(Task8.calc_integral(f, 1, 2, 0.000001, Types.central_rect))
-    print("Trapezium method: ")
     print(Task8.calc_integral(f, 1, 2, 0.000001, Types.trapezium))
-    print("Simpson method:")
-    #print(Task8.calc_integral(f, 1, 2, 0.000001, Types.simpson))
-
-def test2():
-    f = lambda x: np.sqrt(x) / x
-    print("LR method: ")
-    print(Task8.calc_integral(f, 1, 2, 0.000001, Types.left_rect))
-    print("RR method: ")
-    print(Task8.calc_integral(f, 1, 2, 0.000001, Types.right_rect))
-    print("CR method: ")
-    print(Task8.calc_integral(f, 1, 2, 0.000001, Types.central_rect))
-    print("Trapezium method: ")
-    print(Task8.calc_integral(f, 1, 2, 0.000001, Types.trapezium))
-    print("Simpson method:")
-    #print(Task8.calc_integral(f, 1, 2, 0.000001, Types.simpson))
-
-def test3():
-    f = lambda x: x**3
-    print("LR method: ")
-    print(Task8.calc_integral(f, 1, 2, 0.000001, Types.left_rect))
-    print("RR method: ")
-    print(Task8.calc_integral(f, 1, 2, 0.000001, Types.right_rect))
-    print("CR method: ")
-    print(Task8.calc_integral(f, 1, 2, 0.000001, Types.central_rect))
-    print("Trapezium method: ")
-    print(Task8.calc_integral(f, 1, 2, 0.000001, Types.trapezium))
-    print("Simpson method:")
-    print(Task8.calc_integral(f, 1, 2, 0.000001, Types.simpson))
-
-
-
+    print(Task8.calc_integral(f, 1, 2, 0.000001, Types.simpson)).
+    
 if __name__ == "__main__":
-    #test1()
-    #test2()
-    test3()
-    # f = lambda x: np.sin(x) / x
-    # print(Task8.calc_integral(f, 1, 2, 0.000001, Types.left_rect))
-    # print(Task8.calc_integral(f, 1, 2, 0.000001, Types.right_rect))
-    # print(Task8.calc_integral(f, 1, 2, 0.000001, Types.central_rect))
-    # print(Task8.calc_integral(f, 1, 2, 0.000001, Types.trapezium))
-    # print(Task8.calc_integral(f, 1, 2, 0.000001, Types.simpson))
-    #
-    #
-    # print(Task8.first_diff(f, 1.5, 0.01))
-    # print(Task8.second_diff(f, 1.5, 0.01))
+    f = lambda x: np.sin(x) / x
+    t()
+    print(Task8.first_diff(f, 1.5, 0.01))
+    print(Task8.second_diff(f, 1.5, 0.01))
