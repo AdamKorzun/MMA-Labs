@@ -9,15 +9,14 @@ import functools
 
 x = sympy.Symbol('x')
 
-VARIANT = 10
-VARIABLES = 5
-DIFF_POINTS = 10
+k_var = 10
+num_var = 5
 
 a = -1
 b = 1
 class Utils:
     def func_for_substantiation(subs):
-        func = sympy.sin(VARIANT) * sympy.diff(subs, x, x) + ((1 + sympy.cos(VARIANT) * x ** 2) * subs + 1)
+        func = sympy.sin(k_var) * sympy.diff(subs, x, x) + ((1 + sympy.cos(k_var) * x ** 2) * subs + 1)
         return func
 
     def generate_basis_sequence(n):
@@ -61,11 +60,12 @@ class Utils:
             raise NotImplementedError
 
     def show_plots(functions, start_x, end_x, dx, title):
-        for function in functions:
-            x_list = numpy.arange(start_x, end_x, dx)
-            y_list = [function(p) for p in x_list]
-            pylab.plot(x_list, y_list)
-            pylab.title(title)
+        for f in functions:
+            for function in f:
+                x_list = numpy.arange(start_x, end_x, dx)
+                y_list = [function(p) for p in x_list]
+                pylab.plot(x_list, y_list)
+                pylab.title(title)
         pylab.grid(True)
         pylab.show()
 
@@ -93,12 +93,7 @@ class CollocationMethod:
         right_side = [f(point) - resudial_part_diff(0)(point)
                       for point in collocation_points]
         answer = numpy.linalg.solve(numpy.matrix(matrix), numpy.array(right_side))
-        return lambda x: basis[0](x) + sum(answer[i - 1] * basis[i](x)
-                                           for i in range(1, num_of_basis_functions))
-
-
-
-
+        return lambda x: basis[0](x) + sum(answer[i - 1] * basis[i](x) for i in range(1, num_of_basis_functions))
 
 class GalerkinMethod:
     def Galerkin_method(coefficients, f, num_of_basis_functions, a, b):
@@ -146,12 +141,6 @@ class GalerkinMethod:
         answer = linsolve(lin_system, *symbols)
         return answer
 
-
-
-
-
-
-
 class LSM:
     def integral_LSM(coefficients, f, num_of_basis_functions, a, b):
         basis = Utils.get_basis_system(num_of_basis_functions)
@@ -172,8 +161,6 @@ class LSM:
         return lambda x: basis[0](x) + sum(answer[i - 1] * basis[i](x)
                                            for i in range(1, num_of_basis_functions))
 
-
-
     def discrete_LSM(coefficients, f, num_of_basis_functions, points):
         basis = Utils.get_basis_system(num_of_basis_functions)
 
@@ -192,9 +179,6 @@ class LSM:
         answer = numpy.linalg.solve(numpy.matrix(matrix), numpy.array(right_side))
         return lambda x: basis[0](x) + sum(answer[i - 1] * basis[i](x)
                                            for i in range(1, num_of_basis_functions))
-
-
-
 
     def integral_least_square_method(basis, a, b):
         func = Utils.build_function_from_basis(basis)
@@ -223,37 +207,28 @@ class LSM:
 
 
 
+def task():
+    dif_p = 5
 
+    coeffs = [lambda x: 1 + math.cos(k_var) * x ** 2,
+              lambda x: 0,
+              lambda x: math.sin(k_var)]
+    f = lambda x: -1
+    print( linspace(a + 0.2, b - 0.2, num_var))
+    print('collocations method: \n', list(CollocationMethod.collocations_method(Utils.generate_basis_sequence(num_var),linspace(a + 0.2, b - 0.2, num_var))))
+    print('integral lsm method: \n', list(LSM.integral_least_square_method(Utils.generate_basis_sequence(num_var), a, b)))
+    print('discrete lsm method: \n', list(LSM.discrete_least_square_method(Utils.generate_basis_sequence(num_var),num_var + dif_p, a, b)))
+    print('galerkin method: \n', list(GalerkinMethod.galerkin_method(Utils.generate_basis_sequence(num_var), a, b)))
+    collocation_points = numpy.linspace(a, b, 100)
+    res_collocation = CollocationMethod.collocation_method(coeffs, f, collocation_points)
+    res_integral = LSM.integral_LSM(coeffs, f, 50, a, b)
+    points = numpy.linspace(a, b, 200)
+    res_discrete = LSM.discrete_LSM(coeffs, f, 100, points)
+    res_galerkin = GalerkinMethod.Galerkin_method(coeffs, f, 50, a, b)
+    # Utils.show_plots([answer_2_with_collocation_method], a, b, 0.01, "Collocations method")
+    # Utils.show_plots([answer_2_with_integral_LSM_method], a, b, 0.01, "Integral LSM method")
+    # Utils.show_plots([answer_2_with_discrete_LSM_method], a, b, 0.01, "Discrete LSM method")
+    Utils.show_plots([[res_collocation], [res_integral], [res_discrete],[res_galerkin]], a, b, 0.01, "All plots combined: ")
 
-
-print( linspace(a + 0.2, b - 0.2, VARIABLES))
-print('collocations method: \n', list(CollocationMethod.collocations_method(Utils.generate_basis_sequence(VARIABLES),
-                                                     linspace(a + 0.2, b - 0.2, VARIABLES))))
-
-print('integral lsm method: \n', list(LSM.integral_least_square_method(Utils.generate_basis_sequence(VARIABLES), a, b)))
-
-print('discrete lsm method: \n', list(LSM.discrete_least_square_method(Utils.generate_basis_sequence(VARIABLES),
-                                                              VARIABLES + DIFF_POINTS, a, b)))
-print('galerkin method: \n', list(GalerkinMethod.galerkin_method(Utils.generate_basis_sequence(VARIABLES), a, b)))
-
-coeffs = [lambda x: 1 + math.cos(VARIANT) * x ** 2,
-          lambda x: 0,
-          lambda x: math.sin(VARIANT)]
-f = lambda x: -1
-
-
-
-
-collocation_points = numpy.linspace(a, b, 100)
-answer_2_with_collocation_method = CollocationMethod.collocation_method(coeffs, f, collocation_points)
-Utils.show_plots([answer_2_with_collocation_method], a, b, 0.01, "Collocations method")
-
-answer_2_with_integral_LSM_method = LSM.integral_LSM(coeffs, f, 50, a, b)
-Utils.show_plots([answer_2_with_integral_LSM_method], a, b, 0.01, "Integral LSM method")
-
-points = numpy.linspace(a, b, 200)
-answer_2_with_discrete_LSM_method = LSM.discrete_LSM(coeffs, f, 100, points)
-Utils.show_plots([answer_2_with_discrete_LSM_method], a, b, 0.01, "Discrete LSM method")
-
-answer_2_with_Galerkin_method = GalerkinMethod.Galerkin_method(coeffs, f, 50, a, b)
-Utils.show_plots([answer_2_with_Galerkin_method], a, b, 0.01, "Galerkin method")
+if __name__=='__main__':
+    task()
