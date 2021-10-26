@@ -209,7 +209,6 @@ class LSM:
 
 def task():
     dif_p = 5
-
     coeffs = [lambda x: 1 + math.cos(k_var) * x ** 2,
               lambda x: 0,
               lambda x: math.sin(k_var)]
