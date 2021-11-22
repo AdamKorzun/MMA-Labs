@@ -5,11 +5,7 @@ from scipy.misc import derivative
 from scipy import sparse
 from scipy import integrate
 import matplotlib.pyplot as plt
-a = 0
-b = 1
-h = (b - a) / 150
-ua = 0
-ub = 0
+
 def A(x, k1, k2, k3, xr1, xr2):
     if x < xr1:
         return k1
@@ -56,41 +52,47 @@ def solve2(a, b, ua, ub, h, k1, k2, k3, xr1, xr2, phi_conds):
     return np.linspace(a, b, n), np.linalg.solve(M, Y)
 
 
-# def task2():
-#     sets = [
-#         [1, 100, 0, (b + a)/2, 2*b],
-#         [100, 1, 0, (b + a)/2, 2*b],
-#         [10, 25, 75, a + (b - a)/3, a + 2*(b - a)/3],
-#         [100, 40, 15, a + (b - a)/3, a + 2*(b - a)/3],
-#         [30, 60 , 30, a + (b - a)/3, a + 2*(b - a)/3],
-#         [100, 5, 100, a + (b - a)/3, a + 2*(b - a)/3]
-#     ]
-#
-#     conditions = [
-#         [((b + a)/2, 20)],
-#         [((b + a)*(0.5 - 0.3), 20), ((b + a)*(0.5 + 0.3), 20)],
-#         [((b + a)*(0.5 - 0.3), 20), ((b + a)*(0.5 + 0.3), 200)]
-#     ]
-#     for s in sets:
-#     	for conds in conditions:
-#             plt.plot(*solve2(a, b, ua, ub, h, *s, conds), label='{}, {}, {}'.format(*s))
-#             plt.plot()
-#             plt.legend()
-#             plt.show()
+def task2():
+    a = 0
+    b = 1
+    h = (b - a) / 150
+    ua = 0
+    ub = 0
+    sets = [
+        [1, 100, 0, (b + a)/2, 2*b],
+        [100, 1, 0, (b + a)/2, 2*b],
+        [10, 25, 75, a + (b - a)/3, a + 2*(b - a)/3],
+        [100, 40, 15, a + (b - a)/3, a + 2*(b - a)/3],
+        [30, 60 , 30, a + (b - a)/3, a + 2*(b - a)/3],
+        [100, 5, 100, a + (b - a)/3, a + 2*(b - a)/3]
+    ]
+
+    conditions = [
+        [((b + a)/2, 20)],
+        [((b + a)*(0.5 - 0.3), 20), ((b + a)*(0.5 + 0.3), 20)],
+        [((b + a)*(0.5 - 0.3), 20), ((b + a)*(0.5 + 0.3), 200)]
+    ]
+    for s in sets:
+    	for conds in conditions:
+            plt.plot(*solve2(a, b, ua, ub, h, *s, conds), label='{}, {}, {}'.format(*s))
+            plt.plot()
+            plt.legend()
+            plt.show()
 def task3():
-    a = 0.2
-    b = 1.2
-    ua = lambda t: 4.
-    ub = lambda t: 1.
+    a = 0.1
+    b = 1.1
+    ua = lambda t: 2.
+    ub = lambda t: 4.
     k = lambda x: x
-    f = lambda x: 4.*x*x*x + 6.
-    phi = lambda x: -10*x*x + 11 * x + 2.2
+    f = lambda x: x**3 +  2.
     h = 0.05
     t = 0.001
     K = int((b - a)/h) + 1
     T = 501
     M = np.zeros(shape=(T, K))
     X = np.linspace(a, b, K)
+    phi = lambda x:  x**3 +  2.
+
     M[:,0] = np.array([ua(i) for i in np.linspace(0, T, T)])
     M[:,-1] = np.array([ub(i) for i in np.linspace(0, T, T)])
     M[0,:] = np.array([phi(xi) for xi in np.linspace(a, b, K)])
@@ -107,16 +109,16 @@ def task3():
     plt.legend()
     plt.show()
 def task4():
-    a = 0
+    a = -1
     b = 1
     ua = lambda t: 1
-    ub = lambda t: 0
-    k = 0.2
+    ub = lambda t: 1
+    k = 0.5
     f = lambda x: 0
-    phi = lambda x: 1 - x*x
+    phi = lambda x: np.abs(x)
     h = (b - a) / 50
     t = 0.5 * h*h /k
-    T = 0.2
+    T = 0.4
     nK = int((b - a)/h) + 1
     nT = int(T/t)+1
     X = np.linspace(a, b, nK)
@@ -137,6 +139,6 @@ def task4():
     plt.legend()
     plt.show()
 if __name__=='__main__':
-    # task2()
+    task2()
     # task3()
-    task4()
+    # task4()
