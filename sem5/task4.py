@@ -181,8 +181,8 @@ for i in range(len(ns) - 1):
     table[i][4] = max(abs(sol1c[::2] - sol1l))
     table[i][5] = max(abs(sol2c[::2] - sol2l))
 
-df = pd.DataFrame(table, columns=['$N$', '$t$', '$s{(t=t_{n1})}$', '$s{(t=t_{n2})}$', '$max{|t_{n1}|}$', '$max{|t_{n2}|}$'])
-print(df[:-1])
+    df = pd.DataFrame(table, columns=['N', 't', 's(t=tn1)', 's(t=tn2)', 'max(t=tn1)', 'max(t=tn2)'])
+    print(df[:-1])
 # left difference
 
 
