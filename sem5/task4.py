@@ -1,281 +1,241 @@
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
+import sympy
+import numpy
+import math
+from matplotlib import pyplot
+from prettytable import PrettyTable
 
-a = -1
-b = 1
+
+x = sympy.Symbol('x')
+start = -1
+finish = 1
+y_arrays = []
 k = 0.2
 T = 1
-phi = lambda x: 0
+Y2 = []
 g1 = lambda t: 0
 g2 = lambda t: 0
-f = lambda x, t: 1-x**2
-h = 0.01
-t = 0.5 * h * h / k
-NK = int((b - a) / h) + 1
-NT = int(T / t) + 1
+fi = lambda x: x * ( 1 - x)
+data_table = []
 
-def solve1l():
-    M = np.zeros(shape=(NT, NK))
-    M[:, 0] = np.array([g1(i) for i in np.linspace(0, T, NT)])
-    M[0, :] = np.array([phi(i) for i in np.linspace(a, b, NK)])
+class Util:
+    def solve(tau, h, t, last_layer = None):
+        fx = 1
+        A = []
+        B = []
+        Y = []
+        i = 0
+        if (True):
+            pass
+        xi = start
+        while xi < finish - 1e-5:
+            if t != 0:
+                a = -k * tau
+                b = h**2 + 2 * k * tau
+                c = -k * tau
+                d = tau * h**2 * fx + h**2 * last_layer[i]
 
-    for i in range(1, NT):
-        for j in range(1, NK - 1):
-            xj = a + j*h
-            M[i][j] = k * M[i-1][j+1]*t/(h*h) + \
-                      (1 - 2*k*t/(h*h)) * M[i-1][j] + \
-                      k*M[i-1][j-1]*t/(h*h) + \
-                      t*f(xj, i*t)
-        M[i][-1] = M[i][-2] + h * g2(t * i)
-    return M
-    # central difference
+                if i == 0:
+                    Ai = - c / b
+                    Bi = (d - a * g1(t)) / b
+                else:
+                    Ai = -c / (b + a * A[-1])
+                    Bi = (d - a * B[-1]) / (b + a * A[-1])
 
-def solve1c():
-    M = np.zeros(shape=(NT, NK))
-    M[:, 0] = np.array([g1(i) for i in np.linspace(0, T, NT)])
-    M[0, :] = np.array([phi(i) for i in np.linspace(a, b, NK)])
+                A.append(Ai)
+                B.append(Bi)
+            else:
+                Y.append(fi(xi))
+            xi += h
+            i += 1
 
-    for i in range(1, NT):
-        for j in range(1, NK - 1):
-            xj = a + j*h
-            M[i][j] = k * M[i-1][j+1]*t/(h*h) + \
-                      (1 - 2*k*t/(h*h)) * M[i-1][j] + \
-                      k*M[i-1][j-1]*t/(h*h) + \
-                      t*f(xj, i*t)
-        M[i][-1] = M[i][-3] + 2 * h * g2(t * i)
-    return M
+        if t == 0:
+            Y.append(finish ** 2)
+            return Y
 
-def solve2l():
-    M = np.zeros(shape=(NT, NK))
-    M[:, 0] = np.array([g1(i) for i in np.linspace(0, T, NT)])
-    M[0, :] = np.array([phi(i) for i in np.linspace(a, b, NK)])
+        Y = [0] * 11
 
-    for i in range(1, NT):
-        M2 = np.zeros(shape=(NK-1, NK-1))
-        Y = np.zeros(NK-1)
-        M2[0][0] = -(1 + 2 * k * t / (h*h))
-        M2[0][1] = t * k / (h*h)
-        Y[0] = -(M[i-1][1] + t*f(a + i*h, i*t) + k * t * M[i][0]/(h*h))
+        Y[0] = g1(t)
+        Y[-2] = (A[-2] * h * g2(t) + B[-2]) / (1 - A[-2])
+        Y[-1] = Y[-2] + 4*h  # yb
 
-        for j in range(1, NK-2):
-            M2[j][j-1] = k * t/(h*h)
-            M2[j][j] = -(1 + 2 * k * t/(h*h))
-            M2[j][j+1] = k * t/(h*h)
-            Y[j] = -(M[i-1][j+1] + t*f(a + j*h, i*t))
-        # last equation is approximation from even scheme
-        M2[-1][-1] = -1
-        M2[-1][-2] = 1
-        Y[-1] = h * g2(t * i)
+        while i > 1:
+            i -= 1
+            Y[i] = A[i] * Y[i + 1] + B[i]
 
-        M[i, 1:] = np.linalg.solve(M2, Y)
-    return M
-    # central difference
-
-def solve2c():
-    M = np.zeros(shape=(NT, NK))
-    M[:, 0] = np.array([g1(i) for i in np.linspace(0, T, NT)])
-    M[0, :] = np.array([phi(i) for i in np.linspace(a, b, NK)])
-
-    for i in range(1, NT):
-        M2 = np.zeros(shape=(NK-1, NK-1))
-        Y = np.zeros(NK-1)
-        M2[0][0] = -(1 + 2 * k * t / (h*h))
-        M2[0][1] = t * k / (h*h)
-        Y[0] = -(M[i-1][1] + t*f(a + i*h, i*t) + k * t * M[i][0]/(h*h))
-
-        for j in range(1, NK-2):
-            M2[j][j-1] = k * t/(h*h)
-            M2[j][j] = -(1 + 2 * k * t/(h*h))
-            M2[j][j+1] = k * t/(h*h)
-            Y[j] = -(M[i-1][j+1] + t*f(a + j*h, i*t))
-        # last equation is approximation from even scheme
-        M2[-1][-1] = -1
-        M2[-1][-3] = 1
-        Y[-1] = 2 * h * g2(t * i)
-
-        M[i, 1:] = np.linalg.solve(M2, Y)
-    return M
+        return Y
 
 
+    def solve2(tau, h, t, j):
+        Y = [0] * 11
+        fx = 1
+        xi = start
+
+        if j == 0:
+            i = 0
+            while xi < finish:
+                Y[i] = fi(xi)
+                i += 1
+                xi += h
+        else:
+            Y[0] = g1(t)
+            for i in range(1, 10):
+                Y[i] = Y2[j - 1][i] + tau / h ** 2 * (Y2[j - 1][i + 1] - 2 * Y2[j - 1][i] + Y2[j - 1][i - 1]) #+ tau * fx
+                xi += h
+
+            Y[-2] = Y2[j - 1][-2] + tau / h ** 2 * (2 * h * g2(t) - Y2[j - 1][-2] + Y2[j - 1][-3]) #+ tau * fx
+            Y[-1] = Y[-2] + 2 * h *g2(t)
+
+        Y2.append(Y)
 
 
-matrix = solve1l()
-X = np.linspace(a, b, NK)
+    def implicit_function(h, tau):
+        y_arrays.clear()
+        t = 0
+        for i in range(0, 10):
+            if i == 0:
+                y_arrays.append(Util.solve(tau, h, t))
+            else:
+                y_arrays.append(Util.solve(tau, h, t, y_arrays[-1]))
+            if t == 0:
+                t = 2 * tau
+            else:
+                t *= 2
+            if t > T:
+                break
 
-for i in range(0, NT, NT//6):
-    plt.plot(X, matrix[i], label=i)
-    plt.title("Left difference")
-    plt.legend()
-    plt.show()
-    matrix = solve1c()
-    X = np.linspace(a, b, NK)
 
-    for i in range(0, NT, NT//6):
-        plt.plot(X, matrix[i], label=i)
-        plt.title("Central difference")
-    plt.legend()
-    plt.show()
-tn1 = 25
-tn2 = 75
+    def explicit_function(h, tau):
+        t = 0
+        Y2.clear()
+        for i in range(0, 10):
+            Util.solve2(tau, h, t, i)
+            if t == 0:
+                t = 2 * tau
+            else:
+                t *= 2
+            if t > T:
+                break
 
-ns = [10, 20, 40, 80, 160]
-table = np.zeros(shape=(len(ns), 6))
-t = 0.0001
-for i in range(len(ns) - 1):
 
-    h = (b - a) / ns[i]
-    NK = ns[i]
-    NT = int(T / t) + 1
-
-    M1 = solve1l()
-
-    h = (b - a) / ns[i + 1]
-    NK = ns[i + 1]
-    NT = int(T / t) + 1
-
-    M2 = solve1l()
-
-    sol1l = M1[tn1]
-    sol1c = M2[tn1]
-    sol2l = M1[tn2]
-    sol2c = M2[tn2]
-
-    table[i][0] = ns[i]
-    table[i][1] = t
-    table[i][2] = sum((sol1c[::2] - sol1l) ** 2)
-    table[i][3] = sum((sol2c[::2] - sol2l) ** 2)
-    table[i][4] = max(abs(sol1c[::2] - sol1l))
-    table[i][5] = max(abs(sol2c[::2] - sol2l))
-    df = pd.DataFrame(table, columns=['N', 't', 's(t=tn1)', 's(t=tn2)', 'max(t=tn1)', 'max(t=tn2)'])
-    df[:-1]
-    tn1 = 25
-    tn2 = 75
-
-    ns = [10, 20, 40, 80, 160]
-    table = np.zeros(shape=(len(ns), 6))
-    t = 0.0001
-for i in range(len(ns) - 1):
-
-    h = (b - a) / ns[i]
-    NK = ns[i]
-    NT = int(T / t) + 1
-
-    M1 = solve1c()
-
-    h = (b - a) / ns[i + 1]
-    NK = ns[i + 1]
-    NT = int(T / t) + 1
-
-    M2 = solve1c()
-
-    sol1l = M1[tn1]
-    sol1c = M2[tn1]
-    sol2l = M1[tn2]
-    sol2c = M2[tn2]
-
-    table[i][0] = ns[i]
-    table[i][1] = t
-    table[i][2] = sum((sol1c[::2] - sol1l) ** 2)
-    table[i][3] = sum((sol2c[::2] - sol2l) ** 2)
-    table[i][4] = max(abs(sol1c[::2] - sol1l))
-    table[i][5] = max(abs(sol2c[::2] - sol2l))
-
-    df = pd.DataFrame(table, columns=['N', 't', 's(t=tn1)', 's(t=tn2)', 'max(t=tn1)', 'max(t=tn2)'])
-    print(df[:-1])
-# left difference
+    def print_grafic(array, h, method, t):
+        x = numpy.arange(start, finish + h, h)
+        pyplot.plot(x, array, label=f't={t}')
+        pyplot.legend()
+        pyplot.title(method + " метод ")
 
 
 
+    def create_table():
+        table = PrettyTable(["h", "tau", "std(t=2tau)", "std(t=4tau)", "max(abs((t=2tau))", "max(abs(Mmod(t=4tau))"])
+        for data in data_table:
+            table.add_row(data)
+        print(table)
 
 
-
-#### 2
-matrix = solve2l()
-X = np.linspace(a, b, NK)
-
-for i in range(0, NT, NT//6):
-    plt.plot(X, matrix[i], label=i)
-    plt.title("Left difference")
-plt.legend()
-plt.show()
-matrix = solve2c()
-X = np.linspace(a, b, NK)
-
-for i in range(0, NT, NT//6):
-    plt.plot(X, matrix[i], label=i)
-    plt.title("Central difference")
-plt.legend()
-plt.show()
-# неявная схема, левая разность
-
-tn1 = 25
-tn2 = 75
-
-ns = [10, 20, 40, 80, 160]
-table = np.zeros(shape=(len(ns), 6))
-t = 0.0001
-for i in range(len(ns) - 1):
-
-    h = (b - a) / ns[i]
-    NK = ns[i]
-    NT = int(T / t) + 1
-
-    M1 = solve2l()
-
-    h = (b - a) / ns[i + 1]
-    NK = ns[i + 1]
-    NT = int(T / t) + 1
-
-    M2 = solve2l()
-
-    sol1l = M1[tn1]
-    sol1c = M2[tn1]
-    sol2l = M1[tn2]
-    sol2c = M2[tn2]
-
-    table[i][0] = ns[i]
-    table[i][1] = t
-    table[i][2] = sum((sol1c[::2] - sol1l) ** 2)
-    table[i][3] = sum((sol2c[::2] - sol2l) ** 2)
-    table[i][4] = max(abs(sol1c[::2] - sol1l))
-    table[i][5] = max(abs(sol2c[::2] - sol2l))
-
-df = pd.DataFrame(table, columns=['$N$', '$t$', '$s{(t=t_{n1})}$', '$s{(t=t_{n2})}$', '$max{|t_{n1}|}$', '$max{|t_{n2}|}$'])
-df[:-1]
-tn1 = 25
+    def my_round(value):
+        return "{:.5f}".format(value)
 
 
-tn2 = 75
+def main():
+    h = (finish - start) / 10
+    tau = 0.5 * h ** 2 / k
+    tau_test = tau
+    N = h
+    j = 1
+    for i in range(0, 4):
+        Util.implicit_function(h, tau_test)
+        max_2_tau = 0
+        for u in y_arrays[1]:
+            if max_2_tau < u:
+                max_2_tau = u
 
-ns = [10, 20, 40, 80, 160]
-table = np.zeros(shape=(len(ns), 6))
-t = 0.0001
-for i in range(len(ns) - 1):
+        max_4_tau = 0
+        for u in y_arrays[2]:
+            if max_4_tau < u:
+                max_4_tau = u
 
-    h = (b - a) / ns[i]
-    NK = ns[i]
-    NT = int(T / t) + 1
+        data_table.append([N, Util.my_round(tau_test), Util.my_round(y_arrays[1][j]), Util.my_round(y_arrays[2][j]), max_2_tau, max_4_tau])
+        N *= 2
+        j += 2
+        tau_test /= 4
 
-    M1 = solve2c()
+    Util.create_table()
 
-    h = (b - a) / ns[i + 1]
-    NK = ns[i + 1]
-    NT = int(T / t) + 1
+    Util.implicit_function(h, tau)
+    t = 0
+    for array in y_arrays:
+        Util.print_grafic(array, h, "Неявный", "{t:.9f}".format(t=t))
+        if t == 0:
+            t = 2 * tau
+        else:
+            t *= 2
+    pyplot.show()
 
-    M2 = solve2c()
+    data_table.clear()
+    tau_test = tau
+    N = h
+    j = 1
+    for i in range(0, 4):
+        Util.explicit_function(h, tau_test)
+        max_2_tau = 0
+        for u in Y2[1]:
+            if max_2_tau < u:
+                max_2_tau = u
 
-    sol1l = M1[tn1]
-    sol1c = M2[tn1]
-    sol2l = M1[tn2]
-    sol2c = M2[tn2]
+        max_4_tau = 0
+        for u in Y2[2]:
+            if max_4_tau < u:
+                max_4_tau = u
 
-    table[i][0] = ns[i]
-    table[i][1] = t
-    table[i][2] = sum((sol1c[::2] - sol1l) ** 2)
-    table[i][3] = sum((sol2c[::2] - sol2l) ** 2)
-    table[i][4] = max(abs(sol1c[::2] - sol1l))
-    table[i][5] = max(abs(sol2c[::2] - sol2l))
+        data_table.append([N, Util.my_round(tau_test), Util.my_round(Y2[1][j]), Util.my_round(Y2[2][j]), max_2_tau, max_4_tau])
+        N *= 2
+        j += 2
+        tau_test /= 4
 
-df = pd.DataFrame(table, columns=['$N$', '$t$', '$s{(t=t_{n1})}$', '$s{(t=t_{n2})}$', '$max{|t_{n1}|}$', '$max{|t_{n2}|}$'])
-print(df[:-1])
+    Util.create_table()
+    Util.explicit_function(h, tau)
+    t = 0
+    for array in Y2:
+        Util.print_grafic(array, h, "Явный", "{t:.9f}".format(t=t))
+        if t == 0:
+            t = 2 * tau
+        else:
+            t *= 2
+    pyplot.show()
+
+    tau = h ** 2 / 6
+    data_table.clear()
+    tau_test = tau
+    N = h
+    j = 1
+    for i in range(0, 4):
+        Util.implicit_function(h, tau_test)
+        max_2_tau = 0
+        for u in y_arrays[1]:
+            if max_2_tau < u:
+                max_2_tau = u
+
+        max_4_tau = 0
+        for u in y_arrays[2]:
+            if max_4_tau < u:
+                max_4_tau = u
+
+        data_table.append([N, Util.my_round(tau_test), Util.my_round(y_arrays[1][j]), Util.my_round(y_arrays[2][j]), max_2_tau, max_4_tau])
+        N *= 2
+        j += 2
+        tau_test /= 4
+
+    Util.create_table()
+    Util.explicit_function(h, tau)
+    t = 0
+    for array in Y2:
+        Util.print_grafic(array, h, "Явный (t=h^2 / 6)", "{t:.9f}".format(t=t))
+        if t == 0:
+            t = 2 * tau
+        else:
+            t *= 2
+    pyplot.show()
+
+
+if __name__ == "__main__":
+    main()
